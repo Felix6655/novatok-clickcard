@@ -191,7 +191,7 @@ export default function AuthPage() {
               )}
             </div>
 
-            <p className="pt-3 text-xs text-gray-500">
+            <p className="text-xs text-gray-400">build: e8ff8e0</p>
               Tip: If “Confirm email” is ON in Supabase, check your inbox after signing up.
             </p>
           </div>
