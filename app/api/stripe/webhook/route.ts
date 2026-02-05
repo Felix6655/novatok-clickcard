@@ -43,10 +43,15 @@ export async function POST(req: Request) {
       const customerId =
         typeof session.customer === "string" ? session.customer : null;
       const subscriptionId =
-        typeof session.subscription === "string" ? session.subscription : null;
+        typeof session.subscription === "string"
+          ? session.subscription
+          : null;
 
       if (userId && customerId && subscriptionId) {
-        const sub = await stripe.subscriptions.retrieve(subscriptionId);
+        // ✅ Typing fix for newer Stripe SDK
+        const sub = (await stripe.subscriptions.retrieve(
+          subscriptionId
+        )) as unknown as Stripe.Subscription;
 
         await supabaseAdmin.from("subscriptions").upsert(
           {
