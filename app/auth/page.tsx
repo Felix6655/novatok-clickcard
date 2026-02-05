@@ -21,11 +21,8 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-
-  // ✅ Track session so we can show/hide Logout button correctly
   const [session, setSession] = useState<any>(null);
 
-  // ✅ If already logged in, go straight to dashboard + keep session updated
   useEffect(() => {
     let mounted = true;
 
@@ -179,7 +176,6 @@ export default function AuthPage() {
                 Log in
               </button>
 
-              {/* ✅ Only show logout when user is logged in */}
               {session && (
                 <button
                   onClick={handleLogout}
@@ -191,7 +187,7 @@ export default function AuthPage() {
               )}
             </div>
 
-            <p className="text-xs text-gray-400">build: e8ff8e0</p>
+            <p className="pt-3 text-xs text-gray-500">
               Tip: If “Confirm email” is ON in Supabase, check your inbox after signing up.
             </p>
           </div>
