@@ -25,6 +25,7 @@ export async function POST(req: Request) {
   const body = await req.text();
 
   let event: Stripe.Event;
+
   try {
     event = stripe.webhooks.constructEvent(
       body,
@@ -48,18 +49,18 @@ export async function POST(req: Request) {
           : null;
 
       if (userId && customerId && subscriptionId) {
-        // ✅ Typing fix for newer Stripe SDK
-        const sub = (await stripe.subscriptions.retrieve(
-          subscriptionId
-        )) as unknown as Stripe.Subscription;
+        // Retrieve subscription (Stripe SDK typing varies by version)
+        const sub = await stripe.subscriptions.retrieve(subscriptionId);
 
         await supabaseAdmin.from("subscriptions").upsert(
           {
             user_id: userId,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            status: sub.status,
-            current_period_end: toIsoFromUnix(sub.current_period_end),
+            status: (sub as any).status,
+            current_period_end: toIsoFromUnix(
+              (sub as any).current_period_end
+            ),
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" }
