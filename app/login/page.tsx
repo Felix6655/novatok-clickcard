@@ -1,22 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 export default function LoginPage() {
-  const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleLogin = async () => {
+  async function login() {
     setLoading(true);
-    setErrorMsg("");
+    setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -24,17 +21,18 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      setErrorMsg(error.message);
+      setError(error.message);
       return;
     }
 
-    // full reload so the session cookie is applied before dashboard checks it
-    window.location.href = "/dashboard";
-  };
+    if (data.session) {
+      window.location.href = "/dashboard";
+    }
+  }
 
-  const handleSignup = async () => {
+  async function signup() {
     setLoading(true);
-    setErrorMsg("");
+    setError("");
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -44,47 +42,45 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      setErrorMsg(error.message);
+      setError(error.message);
       return;
     }
 
-    alert("Signup successful. Now log in.");
-  };
+    alert("Account created. Now click Log In.");
+  }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md border rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">Login</h1>
+    <main className="min-h-screen flex justify-center items-center">
+      <div className="w-[400px] border p-6 rounded-xl">
+        <h1 className="text-2xl font-bold mb-4">Login / Sign up</h1>
 
         <input
-          className="w-full border p-2 rounded mb-3"
+          className="w-full border p-2 mb-3 rounded"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
         />
 
         <input
-          className="w-full border p-2 rounded mb-3"
+          className="w-full border p-2 mb-3 rounded"
           placeholder="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
         />
 
-        {errorMsg && <p className="text-red-600 text-sm mb-3">{errorMsg}</p>}
+        {error && <p className="text-red-600 mb-3">{error}</p>}
 
         <button
-          onClick={handleLogin}
+          onClick={login}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded mb-3"
+          className="w-full bg-blue-600 text-white py-2 rounded mb-2"
         >
-          {loading ? "Loading..." : "Log In"}
+          {loading ? "Logging in..." : "Log In"}
         </button>
 
         <button
-          onClick={handleSignup}
+          onClick={signup}
           disabled={loading}
           className="w-full bg-gray-200 py-2 rounded"
         >
