@@ -8,10 +8,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-01-28.clover",
 });
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function validateSupabaseUrl(url: string | undefined): string {
+  if (!url) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL env variable.");
+  }
+  if (!/^https?:\/\//.test(url)) {
+    throw new Error("Invalid NEXT_PUBLIC_SUPABASE_URL: Must be a valid HTTP or HTTPS URL.");
+  }
+  return url;
+}
+
+function validateServiceRoleKey(key: string | undefined): string {
+  if (!key) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY env variable.");
+  }
+  return key;
+}
+
+function getSupabaseAdmin() {
+  const url = validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const key = validateServiceRoleKey(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return createClient(url, key);
+}
+
+const supabaseAdmin = getSupabaseAdmin();
 
 function toIsoFromUnix(unixSeconds?: number | null) {
   if (!unixSeconds) return null;

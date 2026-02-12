@@ -6,9 +6,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function POST(req: Request) {
+  function validateSupabaseUrl(url: string | undefined): string {
+    if (!url) {
+      throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL env variable.");
+    }
+    if (!/^https?:\/\//.test(url)) {
+      throw new Error("Invalid NEXT_PUBLIC_SUPABASE_URL: Must be a valid HTTP or HTTPS URL.");
+    }
+    return url;
+  }
+  function validateSupabaseAnonKey(key: string | undefined): string {
+    if (!key) {
+      throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY env variable.");
+    }
+    return key;
+  }
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    validateSupabaseAnonKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   // Get logged-in user (requires auth session)
