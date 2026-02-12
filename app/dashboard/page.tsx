@@ -10,6 +10,8 @@ type Card = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  email: string | null;
+  phone: string | null;
 };
 
 export default function DashboardPage() {
@@ -24,6 +26,8 @@ export default function DashboardPage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   // ✅ Load user session
   useEffect(() => {
@@ -50,7 +54,7 @@ export default function DashboardPage() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setCards(data);
+      setCards(data as Card[]);
     }
   };
 
@@ -60,17 +64,21 @@ export default function DashboardPage() {
 
   // ✅ Create new card
   const createCard = async () => {
-    if (!slug.trim()) {
+    const cleanSlug = slug.trim().toLowerCase();
+
+    if (!cleanSlug) {
       alert("Slug is required");
       return;
     }
 
     const { error } = await supabase.from("cards").insert([
       {
-        slug,
-        display_name: displayName,
-        bio,
-        avatar_url: avatarUrl,
+        slug: cleanSlug,
+        display_name: displayName.trim() || null,
+        bio: bio.trim() || null,
+        avatar_url: avatarUrl.trim() || null,
+        email: email.trim() || null,
+        phone: phone.trim() || null,
         user_id: user.id,
       },
     ]);
@@ -85,6 +93,8 @@ export default function DashboardPage() {
     setDisplayName("");
     setBio("");
     setAvatarUrl("");
+    setEmail("");
+    setPhone("");
 
     fetchCards();
   };
@@ -141,6 +151,22 @@ export default function DashboardPage() {
           placeholder="Avatar URL"
           value={avatarUrl}
           onChange={(e) => setAvatarUrl(e.target.value)}
+          className="w-full border p-2 rounded mb-2"
+        />
+
+        <input
+          type="email"
+          placeholder="Email (optional)"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2 rounded mb-2"
+        />
+
+        <input
+          type="tel"
+          placeholder="Phone (optional)"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         />
 
@@ -166,8 +192,15 @@ export default function DashboardPage() {
                 className="border rounded p-3 flex justify-between items-center"
               >
                 <div>
-                  <p className="font-bold">{card.display_name}</p>
+                  <p className="font-bold">{card.display_name || card.slug}</p>
                   <p className="text-sm text-gray-500">/{card.slug}</p>
+                  {(card.email || card.phone) && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {card.email ? `Email: ${card.email}` : ""}
+                      {card.email && card.phone ? " • " : ""}
+                      {card.phone ? `Phone: ${card.phone}` : ""}
+                    </p>
+                  )}
                 </div>
 
                 <a
